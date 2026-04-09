@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>租房税费计算器</title>
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+body{
+  background:#f5f7fa;
+  padding-bottom:60px;
+}
+.header{
+  background:#0066cc;
+  color:#fff;
+  padding:20px 16px;
+  text-align:center;
+  font-size:18px;
+}
+.container{
+  max-width:480px;
+  margin:0 auto;
+  padding:0 12px;
+}
+.card{
+  background:#fff;
+  border-radius:16px;
+  margin-top:12px;
+  padding:20px;
+  box-shadow:0 2px 10px rgba(0,0,0,0.05);
+}
+.card-title{
+  font-size:16px;
+  margin-bottom:16px;
+  color:#222;
+}
+.form-item{
+  margin-bottom:20px;
+}
+.form-label{
+  display:block;
+  font-size:14px;
+  color:#555;
+  margin-bottom:8px;
+}
+.input-box{
+  width:100%;
+  padding:14px;
+  border:1px solid #e0e0e0;
+  border-radius:12px;
+  font-size:16px;
+  outline:none;
+}
+.input-box:focus{
+  border-color:#0066cc;
+}
+
+/* 自定义下拉主体 */
+.custom-select{
+  position:relative;
+  user-select:none;
+}
+.select-head{
+  width:100%;
+  padding:14px;
+  background:#fff;
+  border:1px solid #e0e0e0;
+  border-radius:12px;
+  font-size:16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  cursor:pointer;
+}
+.select-head.active{
+  border-color:#0066cc;
+}
+.select-arrow{
+  width:16px;
+  height:16px;
+  color:#666;
+  transition:transform 0.2s;
+}
+.select-head.active .select-arrow{
+  transform:rotate(180deg);
+}
+
+/* 下拉选项面板（圆角卡片） */
+.select-options{
+  position:absolute;
+  top:calc(100% + 8px);
+  left:0;
+  right:0;
+  background:#fff;
+  border-radius:14px;
+  box-shadow:0 4px 16px rgba(0,0,0,0.1);
+  overflow:hidden;
+  display:none;
+  z-index:10;
+}
+.select-option{
+  padding:14px 16px;
+  font-size:16px;
+  cursor:pointer;
+}
+.select-option:hover{
+  background:#f5f7fa;
+}
+.select-option.selected{
+  color:#0066cc;
+  font-weight:500;
+}
+
+.btn-calc{
+  width:100%;
+  background:#0066cc;
+  color:#fff;
+  border:none;
+  border-radius:12px;
+  padding:16px;
+  font-size:16px;
+  font-weight:500;
+  cursor:pointer;
+}
+.btn-calc:active{
+  background:#005bb3;
+}
+
+.result-card{
+  margin-top:24px;
+  display:none;
+}
+.result-item{
+  display:flex;
+  justify-content:space-between;
+  padding:14px 0;
+  border-bottom:1px solid #f0f0f0;
+}
+.result-item:last-child{
+  border-bottom:none;
+}
+.result-label{
+  color:#555;
+  font-size:15px;
+}
+.result-value{
+  font-weight:500;
+  color:#222;
+}
+.total-tax{
+  color:#e63946;
+  font-size:16px;
+  font-weight:bold;
+}
+.tip{
+  font-size:12px;
+  color:#999;
+  margin-top:12px;
+  line-height:1.4;
+}
+</style>
+</head>
+
+<body>
+<div class="header">隆回县税务局个人出租房屋税费计算器（开发者：易诗蓓）</div>
+
+<div class="container">
+  <div class="card">
+    <div class="card-title">计税信息</div>
+    <div class="form-item">
+      <label class="form-label">房屋类型</label>
+      <div class="custom-select">
+        <div class="select-head" id="selectHead">
+          <span id="selectText">城镇住房</span>
+          <svg class="select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+        </div>
+        <div class="select-options" id="selectOptions">
+          <div class="select-option selected" data-value="Urban_residential">城镇住房</div>
+          <div class="select-option" data-value="Urban_commercial">城镇非住房（含车库/门面/经营用房/写字楼）</div>
+          <div class="select-option" data-value="Rural_residential">农村住房</div>
+          <div class="select-option" data-value="Rural_commercial">农村非住房（含车库/门面/经营用房/写字楼）</div>
+        </div>
+      </div>
+    </div>
+    <div class="form-item">
+      <label class="form-label">月租金（元）</label>
+      <input type="number" class="input-box" id="rent" placeholder="请输入月租金" min="0" step="0.01">
+    </div>
+    <div class="form-item">
+      <label class="form-label">月修缮费（元）</label>
+      <input type="number" class="input-box" id="repair" placeholder="请输入月修缮费" min="0" max="800" step="0.01">
+    </div>
+    <div class="form-item">
+      <label class="form-label">出租时间（月）</label>
+      <input type="number" class="input-box" id="month" placeholder="请输入出租时间" min="0" max="36" step="0.01">
+    </div>
+    
+
+    <button class="btn-calc" onclick="calculate()">开始计算</button>
+  </div>
+
+  <div class="card result-card" id="resultBox">
+    <div class="card-title">计算结果</div>
+    <div class="result-item">
+      <span class="result-label">增值税</span>
+      <span class="result-value" id="vat">0.00 元</span>
+    </div>
+    <div class="result-item">
+      <span class="result-label">附加税</span>
+      <span class="result-value" id="surtax">0.00 元</span>
+    </div>
+    <div class="result-item">
+      <span class="result-label">印花税</span>
+      <span class="result-value" id="stamptax">0.00 元</span>
+    </div>
+    <div class="result-item">
+      <span class="result-label">房产税</span>
+      <span class="result-value" id="propertyTax">0.00 元</span>
+    </div>
+    <div class="result-item">
+      <span class="result-label">个人所得税</span>
+      <span class="result-value" id="incomeTax">0.00 元</span>
+    </div>
+    <div class="result-item">
+      <span class="result-label">按月税费</span>
+      <span class="result-value total-tax" id="monthTax">0.00 元</span>
+    </div>
+    <div class="result-item">
+      <span class="result-label">合计税费</span>
+      <span class="result-value total-tax" id="totalTax">0.00 元</span>
+    </div>
+    <div class="tip">
+      说明：住房月租金≤10万元免征增值税；附加税按增值税减半征收；住房个税按10%，非住房按20%减半征收。
+    </div>
+  </div>
+</div>
+
+<script>
+// 自定义下拉逻辑
+const selectHead = document.getElementById('selectHead');
+const selectOptions = document.getElementById('selectOptions');
+const selectText = document.getElementById('selectText');
+const options = document.querySelectorAll('.select-option');
+
+selectHead.addEventListener('click', (e) => {
+  e.stopPropagation();
+  selectHead.classList.toggle('active');
+  selectOptions.style.display = 
+    selectOptions.style.display === 'block' ? 'none' : 'block';
+});
+
+options.forEach(opt => {
+  opt.addEventListener('click', () => {
+    // 重置选中状态
+    options.forEach(o => o.classList.remove('selected'));
+    opt.classList.add('selected');
+    // 更新文本
+    selectText.textContent = opt.textContent;
+    // 保存值
+    selectHead.dataset.value = opt.dataset.value;
+    // 关闭
+    selectOptions.style.display = 'none';
+    selectHead.classList.remove('active');
+  });
+});
+
+document.addEventListener('click', () => {
+  selectOptions.style.display = 'none';
+  selectHead.classList.remove('active');
+});
+
+/*function alculate() {
+    const type = selectHead.dataset.value || 'Urban_residential';
+    const rent = Number(document.getElementById("rent").value) || 0;
+    const repair = Number(document.getElementById("repair").value) || 0;
+    const month = Number(document.getElementById("month").value) || 0;
+
+    // 基础参数
+    const VAT_RATE_RES = 0.015;  // 住房增值税率(2026年1.5%)
+    const VAT_RATE_COM = 0.03;    // 非住房增值税率(2026年3%)
+    const VAT_EXEMPT = 100000;    // 增值税月免征额(元)
+    const ADD_ON_RATE = 0.1;     // 城镇附加税(5%+3%+2%)，减半后5%
+    const Rural_ADD_ON_RATE = 0.06;     // 农村附加税(1%+3%+2%)，减半后3%
+    const Stamp_TAX_RES = 0;    // 住房印花税免征
+    const Stamp_TAX_COM = 0.0005;    // 非住房印花税(0.05%)
+    const PROPERTY_TAX_RES = 0.02;// 住房房产税(4%减半后2%)
+    const PROPERTY_TAX_COM = 0.06;// 非住房房产税(12%减半后6%)
+    const INCOME_TAX_RATE_RES = 0.10;// 住房个税(10%)
+    const INCOME_TAX_RATE_COM = 0.20;// 非住房个税(20%)
+
+
+    let vat = 0, vatExempt = false, surtax = 0 , stampTAX = 0;
+    let propertyTax = 0, incomeTax = 0, monthTax = 0  ,total = 0;
+
+    // 增值税计算
+    if (rent >= VAT_EXEMPT) {
+        if (type === "Urban_residential"||type === "Rural_residential") {
+            //住房
+            vat = (rent / (1 + 0.03)) * VAT_RATE_RES;
+        } else {
+            //非住房
+            vat = (rent / (1 + 0.03)) * VAT_RATE_COM;
+        }
+    } else {
+        //增值税免征
+        vatExempt = true;
+    }
+
+    // 附加税(增值税免征则免征)
+    if (!vatExempt) {
+        if (type === "Urban_residential"||type === "Urban_commercial") {
+            //城镇
+            surtax = vat * ADD_ON_RATE * 0.5; // 2022-2027减半
+        } else {
+            //农村
+            surtax = vat * Rural_ADD_ON_RATE * 0.5; // 2022-2027减半
+        }
+    }
+
+    // 印花税
+    if (type === "Urban_residential"||type === "Rural_residential") {
+        //住房没有印花税
+        stampTAX = rent * Stamp_TAX_RES;
+    } else {
+        //非住房有印花税
+        stampTAXx = rent * Stamp_TAX_COM;
+    }
+
+    // 房产税
+    if (type === "Urban_residential"||type === "Rural_residential") {
+        //住房
+        propertyTax = rent * PROPERTY_TAX_RES;
+    } else {
+        //非住房
+        propertyTax = rent * PROPERTY_TAX_COM;
+    }
+
+    // 个人所得税
+    const afterVat = rent - vat; // 不含税收入
+    const deductible = propertyTax + stampTAX + addOn + Math.min(repair, 800); // 可扣除费用
+    let taxableIncome = afterVat - deductible;
+
+    if (taxableIncome < 0) taxableIncome = 0;
+
+    if (type === "Urban_residential"|| type === "Rural_residential") {
+        //住房减半征收
+         if (taxableIncome <= 4000) {
+            incomeTax = (taxableIncome - 800) * INCOME_TAX_RATE_RES;
+        } else {
+            incomeTax = taxableIncome * (1 - 0.2) * INCOME_TAX_RATE_RES;
+        }
+        
+    } else {
+        // 非住房标准计算
+        if (taxableIncome <= 4000) {
+            incomeTax = (taxableIncome - 800) * INCOME_TAX_RATE_COM;
+        } else {
+            incomeTax = taxableIncome * (1 - 0.2) * INCOME_TAX_RATE_COM;
+        }
+    }
+
+    // 总税费
+    if (incomeTax<0) incomeTax = 0;//个人所得税小于0
+    monthTax = vat + surtax + propertyTax + incomeTax;
+    total = monthTax  * month;
+
+
+  document.getElementById('vat').innerText = vat.toFixed(2) + ' 元';
+  document.getElementById('surtax').innerText = surtax.toFixed(2) + ' 元';
+  document.getElementById('propertyTax').innerText = propertyTax.toFixed(2) + ' 元';
+  document.getElementById('incomeTax').innerText = incomeTax.toFixed(2) + ' 元';
+  document.getElementById('totalTax').innerText = total.toFixed(2) + ' 元';
+
+  document.getElementById('resultBox').style.display = 'block';
+  }*/
+// 计算逻辑
+function calculate(){
+  const rent = parseFloat(document.getElementById('rent').value) || 0;
+  const type = selectHead.dataset.value || 'Urban_residential';
+  const repair = Number(document.getElementById("repair").value) || 0;
+  //const isHousing = type === 'Urban_residential';
+  const month = Number(document.getElementById("month").value) || 0;
+
+  // 基础参数
+    const VAT_RATE_RES = 0.015;  // 住房增值税率(2026年1.5%)
+    const VAT_RATE_COM = 0.03;    // 非住房增值税率(2026年3%)
+    const VAT_EXEMPT = 100000;    // 增值税月免征额(元)
+    const ADD_ON_RATE = 0.1;     // 城镇附加税(5%+3%+2%)，减半后5%
+    const Rural_ADD_ON_RATE = 0.06;     // 农村附加税(1%+3%+2%)，减半后3%
+    const Stamp_TAX_RES = 0;    // 住房印花税免征
+    const Stamp_TAX_COM = 0.0005;    // 非住房印花税(0.05%)
+    const PROPERTY_TAX_RES = 0.02;// 住房房产税(4%减半后2%)
+    const PROPERTY_TAX_COM = 0.06;// 非住房房产税(12%减半后6%)
+    const INCOME_TAX_RATE_RES = 0.10;// 住房个税(10%)
+    const INCOME_TAX_RATE_COM = 0.20;// 非住房个税(20%)
+
+    let  vat=0, vatExempt = false,  stampTAX = 0,  surtax=0, propertyTax=0, incomeTax=0;
+    let  monthTax = 0;
+
+    // 增值税计算
+    if (rent >= VAT_EXEMPT) {
+        if (type === "Urban_residential"||type === "Rural_residential") {
+            //住房
+            vat = (rent / (1 + 0.03)) * VAT_RATE_RES;
+        } else {
+            //非住房
+            vat = (rent / (1 + 0.03)) * VAT_RATE_COM;
+        }
+    } else {
+        //增值税免征
+        vatExempt = true;
+    }
+
+    // 附加税(增值税免征则免征)
+    if (!vatExempt) {
+        if (type === "Urban_residential"||type === "Urban_commercial") {
+            //城镇
+            surtax = vat * ADD_ON_RATE * 0.5; // 2022-2027减半
+        } else {
+            //农村
+            surtax = vat * Rural_ADD_ON_RATE * 0.5; // 2022-2027减半
+        }
+    }
+
+    // 印花税
+    if (type === "Urban_residential"||type === "Rural_residential") {
+        //住房没有印花税
+        stampTAX = rent * Stamp_TAX_RES;
+    } else {
+        //非住房有印花税
+        stampTAX = rent * Stamp_TAX_COM;
+    }
+
+    // 房产税
+    if (type === "Urban_residential"||type === "Rural_residential") {
+        //住房
+        propertyTax = rent * PROPERTY_TAX_RES;
+    } else {
+        //非住房
+        propertyTax = rent * PROPERTY_TAX_COM;
+    }
+
+    // 个人所得税
+    const afterVat = rent - vat; // 不含税收入
+    const deductible = propertyTax + stampTAX + surtax + Math.min(repair, 800); // 可扣除费用
+    let taxableIncome = afterVat - deductible;
+
+    if (taxableIncome < 0) taxableIncome = 0;
+
+    if (type === "Urban_residential"|| type === "Rural_residential") {
+        //住房减半征收
+         if (taxableIncome <= 4000) {
+            incomeTax = (taxableIncome - 800) * INCOME_TAX_RATE_RES;
+        } else {
+            incomeTax = taxableIncome * (1 - 0.2) * INCOME_TAX_RATE_RES;
+        }
+        
+    } else {
+        // 非住房标准计算
+        if (taxableIncome <= 4000) {
+            incomeTax = (taxableIncome - 800) * INCOME_TAX_RATE_COM;
+        } else {
+            incomeTax = taxableIncome * (1 - 0.2) * INCOME_TAX_RATE_COM;
+        }
+    }
+    if (incomeTax<0) incomeTax = 0;//个人所得税不得小于0
+
+ /* if(isHousing){
+    vat = rent > 100000 ? rent/1.05*0.015 : 0;
+    surtax = vat * 0.12 * 0.5;
+    propertyTax = rent * 0.02;
+    incomeTax = rent * 0.006;
+  }else{
+    vat = rent / 1.05 * 0.03;
+    surtax = vat * 0.12 * 0.5;
+    propertyTax = rent * 0.12;
+    incomeTax = rent * 0.20;
+  }*/
+  monthTax = vat + surtax +stampTAX + propertyTax + incomeTax;
+
+  const total = monthTax * month;
+
+  document.getElementById('vat').innerText = vat.toFixed(2) + ' 元';
+  document.getElementById('surtax').innerText = surtax.toFixed(2) + ' 元';
+  document.getElementById('stamptax').innerText = stampTAX.toFixed(2) + ' 元';
+  document.getElementById('propertyTax').innerText = propertyTax.toFixed(2) + ' 元';
+  document.getElementById('incomeTax').innerText = incomeTax.toFixed(2) + ' 元';
+  document.getElementById('monthTax').innerText = monthTax.toFixed(2) + ' 元';
+  document.getElementById('totalTax').innerText = total.toFixed(2) + ' 元';
+
+  document.getElementById('resultBox').style.display = 'block';
+}
+</script>
+</body>
+</html>
