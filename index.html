@@ -182,7 +182,7 @@ body{
           </svg>
         </div>
         <div class="select-options" id="selectOptions">
-          <div class="select-option selected" data-value="Urban_residential">城镇住房</div>
+          <div class="select-option selected" data-value="sidential">城镇住房</div>
           <div class="select-option" data-value="Urban_commercial">城镇非住房（含车库/门面/经营用房/写字楼）</div>
           <div class="select-option" data-value="Rural_residential">农村住房</div>
           <div class="select-option" data-value="Rural_commercial">农村非住房（含车库/门面/经营用房/写字楼）</div>
@@ -277,7 +277,7 @@ document.addEventListener('click', () => {
 });
 
 /*function alculate() {
-    const type = selectHead.dataset.value || 'Urban_residential';
+    const type = selectHead.dataset.value || 'sidential';
     const rent = Number(document.getElementById("rent").value) || 0;
     const repair = Number(document.getElementById("repair").value) || 0;
     const month = Number(document.getElementById("month").value) || 0;
@@ -301,7 +301,7 @@ document.addEventListener('click', () => {
 
     // 增值税计算
     if (rent >= VAT_EXEMPT) {
-        if (type === "Urban_residential"||type === "Rural_residential") {
+        if (type === "sidential"||type === "Rural_residential") {
             //住房
             vat = (rent / (1 + 0.03)) * VAT_RATE_RES;
         } else {
@@ -315,7 +315,7 @@ document.addEventListener('click', () => {
 
     // 附加税(增值税免征则免征)
     if (!vatExempt) {
-        if (type === "Urban_residential"||type === "Urban_commercial") {
+        if (type === "sidential"||type === "Urban_commercial") {
             //城镇
             surtax = vat * ADD_ON_RATE * 0.5; // 2022-2027减半
         } else {
@@ -325,7 +325,7 @@ document.addEventListener('click', () => {
     }
 
     // 印花税
-    if (type === "Urban_residential"||type === "Rural_residential") {
+    if (type === "sidential"||type === "Rural_residential") {
         //住房没有印花税
         stampTAX = rent * Stamp_TAX_RES;
     } else {
@@ -334,7 +334,7 @@ document.addEventListener('click', () => {
     }
 
     // 房产税
-    if (type === "Urban_residential"||type === "Rural_residential") {
+    if (type === "sidential"||type === "Rural_residential") {
         //住房
         propertyTax = rent * PROPERTY_TAX_RES;
     } else {
@@ -349,7 +349,7 @@ document.addEventListener('click', () => {
 
     if (taxableIncome < 0) taxableIncome = 0;
 
-    if (type === "Urban_residential"|| type === "Rural_residential") {
+    if (type === "sidential"|| type === "Rural_residential") {
         //住房减半征收
          if (taxableIncome <= 4000) {
             incomeTax = (taxableIncome - 800) * INCOME_TAX_RATE_RES;
@@ -383,7 +383,7 @@ document.addEventListener('click', () => {
 // 计算逻辑
 function calculate(){
   const rent = parseFloat(document.getElementById('rent').value) || 0;
-  const type = selectHead.dataset.value || 'Urban_residential';
+  const type = selectHead.dataset.value || 'sidential';
   const repair = Number(document.getElementById("repair").value) || 0;
   //const isHousing = type === 'Urban_residential';
   const month = Number(document.getElementById("month").value) || 0;
@@ -442,7 +442,7 @@ function calculate(){
     if (type === "Urban_residential"||type === "Rural_residential") {
         //住房
         propertyTax = rent * PROPERTY_TAX_RES;
-    } else {
+    } else if (type === "Urban_commercial") {
         //非住房
         propertyTax = rent * PROPERTY_TAX_COM;
     }
